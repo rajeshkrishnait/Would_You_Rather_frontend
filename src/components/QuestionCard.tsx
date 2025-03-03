@@ -1,11 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { addQuestion, goBack, goNext, updateVotes } from "../store/questionSlice";
 import { fetchRandomQuestion, submitVote } from "../api/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 
+import '../styles/QuestionCard.css'
 const QuestionCard: React.FC = () => {
+    const [flip, setFlip] = useState(true);
+
   const dispatch = useDispatch();
   const { history, currentIndex } = useSelector((state: RootState) => state.question);
   const question = history[currentIndex] || null;
@@ -63,28 +67,29 @@ const QuestionCard: React.FC = () => {
   const voteTwoPercentage = question.totalVotes > 0 ? ((question.voteTwo / question.totalVotes) * 100).toFixed(1) : "0.0";
 
   return (
-    <div>
-      <h2>Would you rather?</h2>
+    <div className='Questions'>
+      <h2 className='Questions__title'>Would you rather?</h2>
+      <div className='Questions__card-wrap'>
+        <div className='Questions__card-wrap--card-one question__card'>
+          <button onClick={() => voteMutation.mutate("vote_one")}>
+            {question.questionOne} 
+          </button>
+          <span>{voteOnePercentage}%</span>
+        </div>
 
-      <div>
-        <button onClick={() => voteMutation.mutate("vote_one")}>
-          {question.questionOne} 
-        </button>
-        <span>{voteOnePercentage}%</span>
+        <div className="Questions__card-wrap--card-two question__card">
+          <button onClick={() => voteMutation.mutate("vote_two")}>
+            {question.questionTwo} 
+          </button>
+          <span>{voteTwoPercentage}%</span>
+        </div>
       </div>
-
-      <div>
-        <button onClick={() => voteMutation.mutate("vote_two")}>
-          {question.questionTwo} 
-        </button>
-        <span>{voteTwoPercentage}%</span>
-      </div>
-
       <br />
-
+    <div className="Questions__controls">
       <button onClick={() => dispatch(goBack())} disabled={currentIndex <= 0}>Back</button>
       <button onClick={() => dispatch(goNext())} disabled={currentIndex >= history.length - 1}>Next</button>
       <button onClick={() => refetch()} disabled={isFetching}>New Question</button>
+    </div>
     </div>
   );
 };

@@ -2,8 +2,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { addNewQuestion } from "../api/api";
-import { useDispatch } from "react-redux";
-import { addNewQuestionToStore } from "../store/questionSlice";
 
 interface FormData {
   questionOne: string;
@@ -11,25 +9,13 @@ interface FormData {
 }
 
 const NewQuestionForm: React.FC = () => {
-  const { register, handleSubmit, reset } = useForm<FormData>();
-  const dispatch = useDispatch();
+  const { register, handleSubmit } = useForm<FormData>();
+//   const dispatch = useDispatch();
 
   // API Mutation for posting a new question
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
       return await addNewQuestion(data);
-    },
-    onSuccess: (newQuestion) => {
-      // ✅ Add new question to Redux store
-      dispatch(addNewQuestionToStore({
-        questionId: newQuestion.question_id,
-        questionOne: newQuestion.question_one,
-        questionTwo: newQuestion.question_two,
-        voteOne: newQuestion.vote_one,
-        voteTwo: newQuestion.vote_two,
-        totalVotes: newQuestion.total_votes,
-      }));
-      reset(); // ✅ Reset form after successful submission
     },
   });
 

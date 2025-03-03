@@ -50,12 +50,8 @@ const questionSlice = createSlice({
         question.totalVotes = totalVotes;
       }
     },
-    addNewQuestionToStore: (state, action: PayloadAction<Question>) => {
-      state.history.push(action.payload);
-      state.currentIndex = state.history.length - 1;
-    },
   },
 });
 
-export const { addQuestion, goBack, goNext, updateVotes, addNewQuestionToStore } = questionSlice.actions;
+export const { addQuestion, goBack, goNext, updateVotes } = questionSlice.actions;
 export default questionSlice.reducer;
