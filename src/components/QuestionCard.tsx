@@ -1,48 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { addQuestion, goBack, goNext, updateVotes } from "../store/questionSlice";
+import { addQuestions, goBack, goNext, updateVotes } from "../store/questionSlice";
 import { fetchRandomQuestion, submitVote } from "../api/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
+import QuestionCardItem from "./QuestionCardItem";
 
-import '../styles/QuestionCard.css'
+import '../styles/QuestionCard.css';
+
 const QuestionCard: React.FC = () => {
-    const [flip, setFlip] = useState(true);
+  const [flip, setFlip] = useState([true, true]);
 
   const dispatch = useDispatch();
   const { history, currentIndex } = useSelector((state: RootState) => state.question);
   const question = history[currentIndex] || null;
-  console.log(question?.voteOne, question?.voteTwo)
-  // Fetch a new random question and map it correctly to our interface
-  const { refetch, isFetching } = useQuery({
-    queryKey: ["randomQuestion"],
+  console.log(history, currentIndex)
+  const { refetch } = useQuery({
+    queryKey: ["randomQuestions"],
     queryFn: async () => {
-      const rawData = await fetchRandomQuestion();
-      
-      // ✅ Map API response to Redux store structure
-      const formattedQuestion = {
-        questionId: rawData.question_id, // Ensure correct key
+      const rawDataArray = await fetchRandomQuestion();
+
+      const formattedQuestions = rawDataArray.map((rawData: any) => ({
+        questionId: rawData.question_id,
         questionOne: rawData.question_one,
         questionTwo: rawData.question_two,
         voteOne: rawData.vote_one,
         voteTwo: rawData.vote_two,
         totalVotes: rawData.total_votes,
-      };
-
-      dispatch(addQuestion(formattedQuestion)); // Store in Redux
-      return formattedQuestion;
+      }));
+  
+      // Dispatch all questions at once
+      dispatch(addQuestions(formattedQuestions));
+  
+      return formattedQuestions;
     },
     staleTime: 0,
-    enabled: false, // Prevent auto-fetching on mount
+    enabled: false,
   });
 
-  // Handle voting
   const voteMutation = useMutation({
     mutationFn: async (vote: "vote_one" | "vote_two") => {
       if (question) {
         const updatedData = await submitVote(question.questionId, vote);
-        // ✅ Ensure updated vote data matches the store's structure
         dispatch(updateVotes({
           questionId: question.questionId,
           voteOne: updatedData.vote_one,
@@ -53,43 +52,54 @@ const QuestionCard: React.FC = () => {
     },
   });
 
-  // Fetch a question on first load
+  // Initial Fetch when history is empty
   useEffect(() => {
-    if (history.length === 0) {
+    if(currentIndex==0 || (currentIndex + 1)%3==0)
       refetch();
-    }
-  }, [history, refetch]);
+  },[currentIndex, refetch]);
 
   if (!question) return <div>Loading...</div>;
 
-  // Correctly calculate percentages
   const voteOnePercentage = question.totalVotes > 0 ? ((question.voteOne / question.totalVotes) * 100).toFixed(1) : "0.0";
   const voteTwoPercentage = question.totalVotes > 0 ? ((question.voteTwo / question.totalVotes) * 100).toFixed(1) : "0.0";
 
-  return (
-    <div className='Questions'>
-      <h2 className='Questions__title'>Would you rather?</h2>
-      <div className='Questions__card-wrap'>
-        <div className='Questions__card-wrap--card-one question__card'>
-          <button onClick={() => voteMutation.mutate("vote_one")}>
-            {question.questionOne} 
-          </button>
-          <span>{voteOnePercentage}%</span>
-        </div>
+  const handleFlip = (index: number) => {
+    setFlip(prev => {
+      const newFlip = [...prev];
+      newFlip[index] = !newFlip[index];
+      return newFlip;
+    });
+  };
 
-        <div className="Questions__card-wrap--card-two question__card">
-          <button onClick={() => voteMutation.mutate("vote_two")}>
-            {question.questionTwo} 
-          </button>
-          <span>{voteTwoPercentage}%</span>
-        </div>
+  const handleNext = () => {
+      dispatch(goNext());
+  };
+
+  return (
+    <div className="Questions">
+      <h2 className="Questions__title">Would you rather?</h2>
+      <div className="Questions__card-wrap">
+        <QuestionCardItem
+          questionText={question.questionOne}
+          votePercentage={voteOnePercentage}
+          flipState={flip[0]}
+          onFlip={() => handleFlip(0)}
+          onVote={() => voteMutation.mutate("vote_one")}
+        />
+
+        <QuestionCardItem
+          questionText={question.questionTwo}
+          votePercentage={voteTwoPercentage}
+          flipState={flip[1]}
+          onFlip={() => handleFlip(1)}
+          onVote={() => voteMutation.mutate("vote_two")}
+        />
       </div>
-      <br />
-    <div className="Questions__controls">
-      <button onClick={() => dispatch(goBack())} disabled={currentIndex <= 0}>Back</button>
-      <button onClick={() => dispatch(goNext())} disabled={currentIndex >= history.length - 1}>Next</button>
-      <button onClick={() => refetch()} disabled={isFetching}>New Question</button>
-    </div>
+
+      <div className="Questions__controls">
+        <button onClick={() => dispatch(goBack())} disabled={currentIndex <= 0}>Back</button>
+        <button onClick={handleNext}>Next</button>
+      </div>
     </div>
   );
 };

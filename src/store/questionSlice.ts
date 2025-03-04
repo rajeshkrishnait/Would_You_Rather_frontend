@@ -16,20 +16,21 @@ interface QuestionState {
 
 const initialState: QuestionState = {
   history: [],
-  currentIndex: -1,
+  currentIndex: 0,
 };
 
 const questionSlice = createSlice({
   name: "question",
   initialState,
   reducers: {
-    addQuestion: (state, action: PayloadAction<Question>) => {
-      // Remove forward history if new question is added
+    addQuestions: (state, action: PayloadAction<Question[]>) => {
+      // Clear forward history if new questions are added
       if (state.currentIndex < state.history.length - 1) {
         state.history = state.history.slice(0, state.currentIndex + 1);
       }
-      state.history.push(action.payload);
-      state.currentIndex = state.history.length - 1;
+
+      // Append new questions to history
+      state.history = [...state.history, ...action.payload];
     },
     goBack: (state) => {
       if (state.currentIndex > 0) {
@@ -53,5 +54,5 @@ const questionSlice = createSlice({
   },
 });
 
-export const { addQuestion, goBack, goNext, updateVotes } = questionSlice.actions;
+export const { addQuestions, goBack, goNext, updateVotes } = questionSlice.actions;
 export default questionSlice.reducer;

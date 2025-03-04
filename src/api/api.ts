@@ -3,7 +3,9 @@ import axios from "axios";
 const API_URL = "http://localhost:5000/api/questions";
 
 export const fetchRandomQuestion = async () => {
-  const response = await axios.get(`${API_URL}/random`);
+  const response = await axios.get(`${API_URL}/random`,{
+    withCredentials: true
+  });
   return response.data;
 };
 

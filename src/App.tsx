@@ -6,6 +6,7 @@ import { store } from "./store/store";
 import './App.css'
 import './styles/global.css'
 import Header from "./components/Header";
+import Notification from './components/Notification.tsx'
 // Lazy load components
 const QuestionCard = lazy(() => import("./components/QuestionCard"));
 const NewQuestionForm = lazy(() => import("./components/NewQuestionForm"));
@@ -26,6 +27,7 @@ const App: React.FC = () => {
               <Route path="/add_question" element={<NewQuestionForm />} />
             </Routes>
           </Suspense>
+          <Notification/>
         </Router>
       </QueryClientProvider>
     </Provider>
