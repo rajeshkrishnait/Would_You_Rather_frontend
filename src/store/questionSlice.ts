@@ -7,6 +7,8 @@ interface Question {
   voteOne: number;
   voteTwo: number;
   totalVotes: number;
+  flipped: boolean;
+  voteCompleted: boolean;
 }
 
 interface QuestionState {
@@ -42,17 +44,25 @@ const questionSlice = createSlice({
         state.currentIndex++;
       }
     },
-    updateVotes: (state, action: PayloadAction<{ questionId: string; voteOne: number; voteTwo: number; totalVotes: number }>) => {
+    updateVotes: (state, action: PayloadAction<{ questionId: string; voteOne: number; voteTwo: number; totalVotes: number; flipped:boolean; voteCompleted:boolean }>) => {
       const { questionId, voteOne, voteTwo, totalVotes } = action.payload;
       const question = state.history.find(q => q.questionId === questionId);
       if (question) {
         question.voteOne = voteOne;
         question.voteTwo = voteTwo;
         question.totalVotes = totalVotes;
+        question.flipped = true;
+        question.voteCompleted = true;
       }
     },
+    updateFlip:(state, action: PayloadAction<{questionId: string;}>)=>{
+      const question = state.history.find(q => q.questionId === action.payload.questionId);
+      if(question){
+        question.flipped = !question.flipped
+      }
+    }
   },
 });
 
-export const { addQuestions, goBack, goNext, updateVotes } = questionSlice.actions;
+export const { addQuestions, goBack, goNext, updateVotes, updateFlip } = questionSlice.actions;
 export default questionSlice.reducer;

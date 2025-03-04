@@ -1,0 +1,47 @@
+label {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: 150ms ease-in;
+    font-weight: 400;
+    font-size: 1rem;
+    background: #fff;
+    padding: 0 0.5rem;
+  }
+  
+  .input-field {
+    position: relative;
+    width: 200px;
+  }
+  
+  .field {
+    outline: none;
+    border: 1px solid black;
+    border-radius: 4px;
+    padding: 16.5px 14px;
+    transition: 150ms;
+  }
+  
+  .field-focus {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    height: 3px;
+    width: 0;
+    transition: 150ms;
+  }
+  
+  .field:focus {
+    border: 1px solid teal;
+  }
+  
+  /* Move label when input is focused OR has a value */
+  .field:focus ~ label,
+  .label-up {
+    transform: translateY(-35px);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: teal;
+  }
+  

@@ -1,25 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { addQuestions, goBack, goNext, updateVotes } from "../store/questionSlice";
+import { addQuestions, goBack, goNext, updateVotes, updateFlip } from "../store/questionSlice";
 import { fetchRandomQuestion, submitVote } from "../api/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import QuestionCardItem from "./QuestionCardItem";
-
-import '../styles/QuestionCard.css';
+import "../styles/QuestionCard.css";
 
 const QuestionCard: React.FC = () => {
-  const [flip, setFlip] = useState([true, true]);
-
   const dispatch = useDispatch();
   const { history, currentIndex } = useSelector((state: RootState) => state.question);
   const question = history[currentIndex] || null;
-  console.log(history, currentIndex)
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  console.log(history, currentIndex);
+
   const { refetch } = useQuery({
     queryKey: ["randomQuestions"],
     queryFn: async () => {
       const rawDataArray = await fetchRandomQuestion();
-
       const formattedQuestions = rawDataArray.map((rawData: any) => ({
         questionId: rawData.question_id,
         questionOne: rawData.question_one,
@@ -27,11 +26,11 @@ const QuestionCard: React.FC = () => {
         voteOne: rawData.vote_one,
         voteTwo: rawData.vote_two,
         totalVotes: rawData.total_votes,
+        flipped: false,
+        voteCompleted: false
       }));
-  
-      // Dispatch all questions at once
+
       dispatch(addQuestions(formattedQuestions));
-  
       return formattedQuestions;
     },
     staleTime: 0,
@@ -41,65 +40,90 @@ const QuestionCard: React.FC = () => {
   const voteMutation = useMutation({
     mutationFn: async (vote: "vote_one" | "vote_two") => {
       if (question) {
-        const updatedData = await submitVote(question.questionId, vote);
-        dispatch(updateVotes({
-          questionId: question.questionId,
-          voteOne: updatedData.vote_one,
-          voteTwo: updatedData.vote_two,
-          totalVotes: updatedData.total_votes,
-        }));
+        if(question.voteCompleted){
+          dispatch(updateFlip({questionId: question.questionId}))
+        }else{
+          const updatedData = await submitVote(question.questionId, vote);
+          dispatch(
+            updateVotes({
+              questionId: question.questionId,
+              voteOne: updatedData.vote_one,
+              voteTwo: updatedData.vote_two,
+              totalVotes: updatedData.total_votes,
+              flipped: true,
+              voteCompleted: true
+            })
+          );
+        }
       }
     },
   });
 
-  // Initial Fetch when history is empty
   useEffect(() => {
-    if(currentIndex==0 || (currentIndex + 1)%3==0)
-      refetch();
-  },[currentIndex, refetch]);
+    if (currentIndex === 0 || (currentIndex + 1) % 3 === 0) refetch();
+  }, [currentIndex, refetch]);
 
-  if (!question) return <div>Loading...</div>;
+  const handleScroll = (event: WheelEvent) => {
+    if (!containerRef.current) return;
 
-  const voteOnePercentage = question.totalVotes > 0 ? ((question.voteOne / question.totalVotes) * 100).toFixed(1) : "0.0";
-  const voteTwoPercentage = question.totalVotes > 0 ? ((question.voteTwo / question.totalVotes) * 100).toFixed(1) : "0.0";
+    if (event.deltaY > 0) {
+      dispatch(goNext());
+    } else if (event.deltaY < 0) {
+      dispatch(goBack());
+    }
 
-  const handleFlip = (index: number) => {
-    setFlip(prev => {
-      const newFlip = [...prev];
-      newFlip[index] = !newFlip[index];
-      return newFlip;
+    containerRef.current.scrollBy({
+      left: event.deltaY > 0 ? window.innerWidth : -window.innerWidth,
+      behavior: "smooth",
     });
   };
 
-  const handleNext = () => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (!containerRef.current) return;
+
+    if (event.key === "ArrowRight") {
       dispatch(goNext());
+      containerRef.current.scrollBy({ left: window.innerWidth, behavior: "smooth" });
+    } else if (event.key === "ArrowLeft") {
+      dispatch(goBack());
+      containerRef.current.scrollBy({ left: -window.innerWidth, behavior: "smooth" });
+    }
   };
 
+  useEffect(() => {
+    window.addEventListener("wheel", handleScroll);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("wheel", handleScroll);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  if (!question) return <div>Loading...</div>;
+  console.log(history)
   return (
-    <div className="Questions">
-      <h2 className="Questions__title">Would you rather?</h2>
-      <div className="Questions__card-wrap">
-        <QuestionCardItem
-          questionText={question.questionOne}
-          votePercentage={voteOnePercentage}
-          flipState={flip[0]}
-          onFlip={() => handleFlip(0)}
-          onVote={() => voteMutation.mutate("vote_one")}
-        />
-
-        <QuestionCardItem
-          questionText={question.questionTwo}
-          votePercentage={voteTwoPercentage}
-          flipState={flip[1]}
-          onFlip={() => handleFlip(1)}
-          onVote={() => voteMutation.mutate("vote_two")}
-        />
-      </div>
-
-      <div className="Questions__controls">
-        <button onClick={() => dispatch(goBack())} disabled={currentIndex <= 0}>Back</button>
-        <button onClick={handleNext}>Next</button>
-      </div>
+    <div className="Questions" ref={containerRef}>
+      {history?.map((item, index) => (
+        <div className="Questions__card-wrap" key={index}>
+          <QuestionCardItem
+            questionText={item.questionOne}
+            votePercentage={
+              item.totalVotes > 0 ? ((item.voteOne / item.totalVotes) * 100).toFixed(1) : "0.0"
+            }
+            flipState={!item.flipped}
+            onVote={() => voteMutation.mutate("vote_one")}
+          />
+          <QuestionCardItem
+            questionText={item.questionTwo}
+            votePercentage={
+              item.totalVotes > 0 ? ((item.voteTwo / item.totalVotes) * 100).toFixed(1) : "0.0"
+            }
+            flipState={!item.flipped}
+            onVote={() => voteMutation.mutate("vote_two")}
+          />
+        </div>
+      ))}
     </div>
   );
 };

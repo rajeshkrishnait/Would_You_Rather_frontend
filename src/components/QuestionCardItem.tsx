@@ -5,7 +5,6 @@ interface QuestionCardItemProps {
   questionText: string;
   votePercentage: string;
   flipState: boolean;
-  onFlip: () => void;
   onVote: () => void;
 }
 
@@ -13,24 +12,23 @@ const QuestionCardItem: React.FC<QuestionCardItemProps> = ({
   questionText,
   votePercentage,
   flipState,
-  onFlip,
   onVote,
 }) => {
   console.log(flipState)
   return (
     <motion.div
       className="question__card"
-      onClick={onFlip}
+      onClick={onVote}
       animate={{ rotateY: flipState ? 0 : 180 }}
       transition={{ duration: 0.6 }}
       whileHover={["grow"]}
       variants={{
         grow: {
-          scale: .9
+          scale: .96
         }}}
     >
       {flipState ? (
-        <div className="question_card-center" onClick={onVote}>
+        <div className="question_card-center" >
             <motion.span
                   style={{
                     margin: 10,
@@ -78,9 +76,11 @@ const QuestionCardItem: React.FC<QuestionCardItemProps> = ({
                     cursor: "pointer",
                     color: 'white',
                     fontWeight:600,
-                    fontSize: '43px'
+                    fontSize: '43px',
+                    transform: "scaleX(-1)"
                   }}
                  animate={["initial"]}
+                 initial={{scaleX:-1}}
                 //  whileHover={["grow"]}
                  variants={{
                 //    grow: {

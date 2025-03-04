@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CloseButton } from "./CloseButton.tsx";
 import '../styles/Notification.css'
+import ScrollIcon from '../assets/scroll_icon.jpg'
+import rightArrow from '../assets/right_arrow_key.jpg'
+import LeftArrow from '../assets/keyboard_key_left.png'
 const Notification = () => {
   const [notifications, setNotifications] = useState(true);
   useEffect(()=>{
@@ -22,6 +25,12 @@ const Notification = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
             >
+                <div className="container__controller">                
+                    <img src={ScrollIcon}/>
+                    <img src={rightArrow}/>
+                    <img src={LeftArrow}/>
+                    <span>Use these to Switch between cards</span></div>
+
               <CloseButton
                 close={() => setNotifications(false)}
               />

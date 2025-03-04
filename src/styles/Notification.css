@@ -1,5 +1,14 @@
 
-  
+.container img{
+    height: 50px;
+    width: 50px;
+    display: flex;
+    flex-direction: column;
+}  
+.container__controller{
+    display: flex;
+    gap:2px;
+}
   ul,
   li {
     padding: 0;
@@ -15,6 +24,7 @@
     flex-direction: column;
     list-style: none;
     justify-content: flex-end;
+    
   }
   
   li {
@@ -24,6 +34,9 @@
     flex: 0 0 100px;
     position: relative;
     border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
   }
   
   button {
@@ -47,9 +60,6 @@
   }
   
   button.close {
-    position: absolute;
-    top: 15px;
-    right: 10px;
     background: white;
     border: none;
   }

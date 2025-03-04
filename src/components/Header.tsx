@@ -1,19 +1,28 @@
-import React from 'react';
-import {Link} from 'react-router-dom'
+import React,{useState} from 'react';
+import NewQuestionForm from './NewQuestionForm';
+import { MenuButton } from './MenuButton';
 import '../styles/Header.css'
+import Modal from './Modal';
 const Header = () =>{
+  const [open, setIsOpen] = useState(false)
+  const menuButtonStyle = {
+    marginLeft: "2rem"
+  };
     return(
-        <nav>
-        <ul style={{ display: "flex", listStyleType: "none" }}>
-          <li style={{ margin: "10px" }}>
-            <Link to="/">Home</Link>
-          </li>
-          <li style={{ margin: "10px" }}>
-            <Link to="/add_question">Add Question</Link>
-          </li>
-        </ul>
-      </nav>
-
+      <nav>
+        <MenuButton
+          isOpen={open}
+          onClick={() => setIsOpen(!open)}
+          strokeWidth="8"
+          color="#ff6666"
+          lineProps={{ strokeLinecap: "round" }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          width="50"
+          height="64"
+          style={menuButtonStyle}
+        />
+        <Modal setisOpen={setIsOpen} isOpen={open}/>
+    </nav>
     )
 }
 

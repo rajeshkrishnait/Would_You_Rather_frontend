@@ -2,14 +2,15 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { addNewQuestion } from "../api/api";
-
+import TextField from "./TextField";
+import '../styles/NewQuestionForm.css'
 interface FormData {
   questionOne: string;
   questionTwo: string;
 }
 
 const NewQuestionForm: React.FC = () => {
-  const { register, handleSubmit } = useForm<FormData>();
+  const { register, handleSubmit, reset } = useForm<FormData>();
 //   const dispatch = useDispatch();
 
   // API Mutation for posting a new question
@@ -17,16 +18,15 @@ const NewQuestionForm: React.FC = () => {
     mutationFn: async (data: FormData) => {
       return await addNewQuestion(data);
     },
+    onSuccess:async()=>{
+      reset()
+    }
   });
 
   return (
     <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
-      <label>Question 1:</label>
-      <input {...register("questionOne", { required: true })} />
-
-      <label>Question 2:</label>
-      <input {...register("questionTwo", { required: true })} />
-
+      <TextField label={"Question One"} props={{...register("questionOne", { required: true })}}/>
+      <TextField label={"Question two"} props={{...register("questionTwo", { required: true })}}/>
       <button type="submit" disabled={mutation.isPending}>
         {mutation.isPending ? "Submitting..." : "Submit"}
       </button>
