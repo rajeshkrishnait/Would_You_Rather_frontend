@@ -77,7 +77,7 @@ const QuestionCard: React.FC = () => {
           );
           setTimeout(()=>{
             if(containerRef.current)
-              containerRef.current.scrollBy({ left: window.innerWidth, behavior: "smooth" });
+              containerRef.current.scrollBy({ left: window.innerWidth + 20, behavior: "smooth" });
             dispatch(goNext());
           }, 1000)
         }
@@ -99,7 +99,7 @@ const QuestionCard: React.FC = () => {
     }
 
     containerRef.current.scrollBy({
-      left: event.deltaY > 0 ? window.innerWidth : -window.innerWidth,
+      left: event.deltaY > 0 ? window.innerWidth + 20 : -window.innerWidth - 20,
       behavior: "smooth",
     });
   };
@@ -109,10 +109,10 @@ const QuestionCard: React.FC = () => {
 
     if (event.key === "ArrowRight") {
       dispatch(goNext());
-      containerRef.current.scrollBy({ left: window.innerWidth, behavior: "smooth" });
+      containerRef.current.scrollBy({ left: window.innerWidth + 20, behavior: "smooth" });
     } else if (event.key === "ArrowLeft") {
       dispatch(goBack());
-      containerRef.current.scrollBy({ left: -window.innerWidth, behavior: "smooth" });
+      containerRef.current.scrollBy({ left: -window.innerWidth - 20, behavior: "smooth" });
     }
   };
 
