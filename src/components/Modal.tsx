@@ -2,25 +2,31 @@ import { motion, AnimatePresence } from "framer-motion";
 import "../styles/modal.css";
 import NewQuestionForm from "./NewQuestionForm";
 
-const Modal = ({isOpen, setisOpen}) => {
+interface ModalProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}
+
+const Modal: React.FC<ModalProps> = ({ isOpen, setIsOpen }) => {
   const overlayVariants = {
     visible: {
       opacity: 1,
       transition: {
         when: "beforeChildren",
         duration: 0.3,
-        delayChildren: 0.4
-      }
+        delayChildren: 0.4,
+      },
     },
     hidden: {
       opacity: 0,
       transition: {
         when: "afterChildren",
         duration: 0.3,
-        delay: 0.4
-      }
-    }
+        delay: 0.4,
+      },
+    },
   };
+
   return (
     <div className="App">
       <AnimatePresence>
@@ -40,13 +46,13 @@ const Modal = ({isOpen, setisOpen}) => {
               transition={{ duration: 0.5 }}
             >
               <div className="modal-header">
-                <h5 className="modal-title">Sumbit Your Own Questions!!</h5>
+                <h5 className="modal-title">Submit Your Own Questions!!</h5>
               </div>
-              <NewQuestionForm/>
+              <NewQuestionForm />
               <div className="modal-footer">
                 <button
                   className="modal-button"
-                  onClick={() => setisOpen(false)}
+                  onClick={() => setIsOpen(false)}
                 >
                   Close
                 </button>
@@ -57,6 +63,6 @@ const Modal = ({isOpen, setisOpen}) => {
       </AnimatePresence>
     </div>
   );
-}
+};
 
 export default Modal;

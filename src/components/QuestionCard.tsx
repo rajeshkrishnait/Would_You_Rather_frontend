@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { addQuestions, goBack, goNext, updateVotes, updateFlip } from "../store/questionSlice";
@@ -6,7 +6,25 @@ import { fetchRandomQuestion, submitVote } from "../api/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import QuestionCardItem from "./QuestionCardItem";
 import "../styles/QuestionCard.css";
+interface RawQuestionData {
+  question_id: string;
+  question_one: string;
+  question_two: string;
+  vote_one: number;
+  vote_two: number;
+  total_votes: number;
+}
 
+interface FormattedQuestion {
+  questionId: string;
+  questionOne: string;
+  questionTwo: string;
+  voteOne: number;
+  voteTwo: number;
+  totalVotes: number;
+  flipped: boolean;
+  voteCompleted: boolean;
+}
 const QuestionCard: React.FC = () => {
   const dispatch = useDispatch();
   const { history, currentIndex } = useSelector((state: RootState) => state.question);
@@ -19,16 +37,18 @@ const QuestionCard: React.FC = () => {
     queryKey: ["randomQuestions"],
     queryFn: async () => {
       const rawDataArray = await fetchRandomQuestion();
-      const formattedQuestions = rawDataArray.map((rawData: any) => ({
-        questionId: rawData.question_id,
-        questionOne: rawData.question_one,
-        questionTwo: rawData.question_two,
-        voteOne: rawData.vote_one,
-        voteTwo: rawData.vote_two,
-        totalVotes: rawData.total_votes,
-        flipped: false,
-        voteCompleted: false
-      }));
+      const formattedQuestions: FormattedQuestion[] = rawDataArray.map(
+        (rawData: RawQuestionData) => ({
+          questionId: rawData.question_id,
+          questionOne: rawData.question_one,
+          questionTwo: rawData.question_two,
+          voteOne: rawData.vote_one,
+          voteTwo: rawData.vote_two,
+          totalVotes: rawData.total_votes,
+          flipped: false,
+          voteCompleted: false,
+        })
+      );
 
       dispatch(addQuestions(formattedQuestions));
       return formattedQuestions;

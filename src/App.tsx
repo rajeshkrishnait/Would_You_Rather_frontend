@@ -9,7 +9,6 @@ import Header from "./components/Header";
 import Notification from './components/Notification.tsx'
 // Lazy load components
 const QuestionCard = lazy(() => import("./components/QuestionCard"));
-const NewQuestionForm = lazy(() => import("./components/NewQuestionForm"));
 
 const queryClient = new QueryClient();
 
@@ -22,9 +21,7 @@ const App: React.FC = () => {
           {/* Routing and Pages with Suspense for Lazy Loading */}
           <Suspense fallback={<div>Loading...</div>}>
             <Routes>
-              <Route path="/" element={<QuestionCard />} />
-              <Route path="/home" element={<QuestionCard />} />
-              <Route path="/add_question" element={<NewQuestionForm />} />
+              <Route path="/would_you_rather_frontend/" element={<QuestionCard />} />
             </Routes>
           </Suspense>
           <Notification/>
