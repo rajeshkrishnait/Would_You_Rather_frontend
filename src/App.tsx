@@ -7,6 +7,7 @@ import './App.css'
 import './styles/global.css'
 import Header from "./components/Header";
 import Notification from './components/Notification.tsx'
+import ServerWakeUpMessage from "./components/ServerWakeUpMessage.tsx";
 // Lazy load components
 const QuestionCard = lazy(() => import("./components/QuestionCard"));
 
@@ -19,7 +20,7 @@ const App: React.FC = () => {
         <Router>
           <Header/>
           {/* Routing and Pages with Suspense for Lazy Loading */}
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<ServerWakeUpMessage/>}>
             <Routes>
               <Route path="/would_you_rather_frontend/" element={<QuestionCard />} />
             </Routes>

@@ -59,6 +59,7 @@ const QuestionCard: React.FC = () => {
 
   const voteMutation = useMutation({
     mutationFn: async (vote: "vote_one" | "vote_two") => {
+      const question = history[currentIndex]
       if (question) {
         if(question.voteCompleted){
           dispatch(updateFlip({questionId: question.questionId}))
@@ -74,6 +75,11 @@ const QuestionCard: React.FC = () => {
               voteCompleted: true
             })
           );
+          setTimeout(()=>{
+            if(containerRef.current)
+              containerRef.current.scrollBy({ left: window.innerWidth, behavior: "smooth" });
+            dispatch(goNext());
+          }, 1000)
         }
       }
     },
@@ -120,7 +126,7 @@ const QuestionCard: React.FC = () => {
     };
   }, []);
 
-  if (!question) return <div>Loading...</div>;
+  if (!question) return <div>There are no more questions to load! Refresh the site to play again or add more questions!</div>;
   console.log(history)
   return (
     <div className="Questions" ref={containerRef}>
@@ -134,6 +140,9 @@ const QuestionCard: React.FC = () => {
             flipState={!item.flipped}
             onVote={() => voteMutation.mutate("vote_one")}
           />
+          <div className="Questions__circle">
+            <span> Would you Rather?</span>
+          </div>
           <QuestionCardItem
             questionText={item.questionTwo}
             votePercentage={

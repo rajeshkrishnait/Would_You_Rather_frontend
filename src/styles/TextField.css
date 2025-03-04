@@ -12,9 +12,11 @@ label {
   
   .input-field {
     position: relative;
-    width: 200px;
+    width: calc(100% - 20px);
   }
-  
+  .input-field > input{
+    width: inherit;
+  }
   .field {
     outline: none;
     border: 1px solid black;

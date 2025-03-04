@@ -15,11 +15,11 @@ const Header = () => {
         isOpen={open}
         onClick={() => setIsOpen(!open)}
         strokeWidth={8}
-        color="#ff6666"
+        color="white"
         lineProps={{ strokeLinecap: "round" }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
         width={50}
-        height={64}
+        height={50}
         style={menuButtonStyle}
       />
       <Modal setIsOpen={setIsOpen} isOpen={open} />
