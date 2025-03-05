@@ -209,6 +209,10 @@ button {
 }
 
 @media screen and ( max-width: 768px) {
+  .Questions {
+    overflow-x: scroll; /* Change from 'scroll' to 'auto' */
+  }
+  
   .Questions__card-wrap{
     flex-direction: column;
   }
