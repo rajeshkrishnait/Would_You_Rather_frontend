@@ -6,3 +6,11 @@ nav{
     margin-top: 2%;
     cursor:pointer;
 }
+@media screen and (max-width: 768px) {
+    nav > svg{
+        width: 25px !important;
+        height: 25px !important;
+        margin-right: 20px;
+        margin-top: 20px;
+    }
+}

@@ -135,15 +135,18 @@ const QuestionCard: React.FC = () => {
   const handleWheel = useCallback(
     debounce((event: WheelEvent) => {
       if (!containerRef.current) return;
-      
-      event.preventDefault(); // Stop default browser scrolling
+  
+      event.preventDefault(); // Prevent default scrolling behavior
   
       const scrollAmount = containerRef.current.offsetWidth; // Full card width
       const isHorizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY);
+      
+      const minSwipeThreshold = 30; // Minimum pixel movement required
   
-      // Force consistent direction regardless of input device
       if (isHorizontal) {
-        // Horizontal Swipe (Trackpad)
+        // Ensure swipe distance is significant
+        if (Math.abs(event.deltaX) < minSwipeThreshold) return;
+  
         if (event.deltaX > 0) {
           smoothScrollTo(containerRef.current.scrollLeft + scrollAmount);
           setTimeout(() => dispatch(goNext()), 1000);
@@ -152,7 +155,9 @@ const QuestionCard: React.FC = () => {
           setTimeout(() => dispatch(goBack()), 1000);
         }
       } else {
-        // Vertical Scroll (Mouse Wheel)
+        // Handle vertical scrolls (optional, but follows the same threshold logic)
+        if (Math.abs(event.deltaY) < minSwipeThreshold) return;
+  
         if (event.deltaY > 0) {
           smoothScrollTo(containerRef.current.scrollLeft + scrollAmount);
           setTimeout(() => dispatch(goNext()), 1000);
@@ -164,6 +169,7 @@ const QuestionCard: React.FC = () => {
     }, 200),
     [dispatch]
   );
+  
   
   useEffect(() => {
     const container = containerRef.current;
@@ -178,8 +184,8 @@ const QuestionCard: React.FC = () => {
 
   return (
     <div id="questions-js" className="Questions" ref={containerRef}>
-      {history?.map((item, index) => (
-        <div className="Questions__card-wrap" key={index}>
+      {history?.map((item) => (
+        <div className="Questions__card-wrap" key={item.questionId}>
           <QuestionCardItem
             questionText={item.questionOne}
             votePercentage={

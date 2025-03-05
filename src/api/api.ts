@@ -16,9 +16,11 @@ export const submitVote = async (questionId: string, vote: string) => {
 
 export const addNewQuestion = async (data: { questionOne: string; questionTwo: string }) => {
   try {
+    const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
     const response = await axios.post(`${API_URL}/new_question`, {
-      question_one: data.questionOne,
-      question_two: data.questionTwo,
+      question_one: capitalizeFirstLetter(data.questionOne),
+      question_two: capitalizeFirstLetter(data.questionTwo),
     });
 
     // Return the response data
