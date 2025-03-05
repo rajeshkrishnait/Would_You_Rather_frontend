@@ -4,20 +4,27 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
   white-space: nowrap;
-  overflow-x: scroll;
+  overflow-x: auto; /* Change from 'scroll' to 'auto' */
   gap: 20px;
   background-color: black;
+  
+  scroll-snap-type: x mandatory; /* Enables snap scrolling */
+  scroll-behavior: smooth; /* Ensures smooth transitions */
 }
+
 .Questions__card-wrap {
   display: flex;
   justify-content: space-around;
   gap: 20px;
   width: 100vw;
-  height:100vh;
+  height: 100vh;
   align-items: center;
   flex: 1;
   position: relative;
+  
+  scroll-snap-align: start; /* Makes each card "latch" into place */
 }
+
 .Questions__circle{
   position: absolute;
   height: 100px;

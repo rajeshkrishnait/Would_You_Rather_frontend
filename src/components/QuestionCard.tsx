@@ -61,31 +61,43 @@ const QuestionCard: React.FC = () => {
 
   const voteMutation = useMutation({
     mutationFn: async (vote: "vote_one" | "vote_two") => {
-      const question = history[currentIndex]
-      if (question) {
-        if(question.voteCompleted){
-          dispatch(updateFlip({questionId: question.questionId}))
-        }else{
-          const updatedData = await submitVote(question.questionId, vote);
-          dispatch(
-            updateVotes({
-              questionId: question.questionId,
-              voteOne: updatedData.vote_one,
-              voteTwo: updatedData.vote_two,
-              totalVotes: updatedData.total_votes,
-              flipped: true,
-              voteCompleted: true
-            })
-          );
-          setTimeout(()=>{
-            if(containerRef.current)
-              containerRef.current.scrollBy({ left: window.innerWidth + 20, behavior: "smooth" });
-            dispatch(goNext());
-          }, 1000)
-        }
+      const question = history[currentIndex];
+  
+      if (!question) return; // Ensure question exists
+  
+      if (question.voteCompleted) {
+        dispatch(updateFlip({ questionId: question.questionId }));
+      } else {
+        const updatedData = await submitVote(question.questionId, vote);
+        
+        dispatch(
+          updateVotes({
+            questionId: question.questionId,
+            voteOne: updatedData.vote_one,
+            voteTwo: updatedData.vote_two,
+            totalVotes: updatedData.total_votes,
+            flipped: true,
+            voteCompleted: true,
+          })
+        );
+  
+        setTimeout(() => {
+          if (containerRef.current) {
+            const cards = containerRef.current.children;
+            const nextCard = cards[currentIndex + 1] as HTMLElement | undefined;
+  
+            if (nextCard) {
+              requestAnimationFrame(() => {
+                nextCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+              });
+              dispatch(goNext()); // Ensure state updates after scroll animation starts
+            }
+          }
+        }, 1000);
       }
     },
   });
+  
 
   useEffect(() => {
     if ((currentIndex === 0 || (currentIndex + 1) % 3 === 0) && !fetchedIndices.current.has(currentIndex)) {
@@ -97,36 +109,50 @@ const QuestionCard: React.FC = () => {
   const handleScroll = useCallback(
     debounce((event: WheelEvent) => {
       if (!containerRef.current) return;
-
-      if (event.deltaY > 0) {
-        dispatch(goNext());
-      } else if (event.deltaY < 0) {
-        dispatch(goBack());
-      }
-
-      containerRef.current.scrollBy({
-        left: event.deltaY > 0 ? window.innerWidth + 20 : -window.innerWidth - 20,
+  
+      const scrollAmount = window.innerWidth + 20; // Exact card width + gap
+      const currentScrollLeft = containerRef.current.scrollLeft;
+      const nextScrollLeft = event.deltaY > 0 ? currentScrollLeft + scrollAmount : currentScrollLeft - scrollAmount;
+  
+      containerRef.current.scrollTo({
+        left: nextScrollLeft,
         behavior: "smooth",
       });
-    }, 200),
-    []
+  
+      if (event.deltaY > 0) {
+        dispatch(goNext());
+      } else {
+        dispatch(goBack());
+      }
+    }, 300), // Debounce time adjusted
+    [dispatch]
   );
-
+  
   const handleKeyDown = useCallback(
     debounce((event: KeyboardEvent) => {
-      event.preventDefault()
+      event.preventDefault(); // Prevent default browser behavior
       if (!containerRef.current) return;
-
+  
+      const scrollAmount = window.innerWidth + 20;
+      const currentScrollLeft = containerRef.current.scrollLeft;
+      let nextScrollLeft = currentScrollLeft;
+  
       if (event.key === "ArrowRight") {
+        nextScrollLeft += scrollAmount;
         dispatch(goNext());
-        containerRef.current.scrollBy({ left: window.innerWidth + 20, behavior: "smooth" });
       } else if (event.key === "ArrowLeft") {
+        nextScrollLeft -= scrollAmount;
         dispatch(goBack());
-        containerRef.current.scrollBy({ left: -window.innerWidth - 20, behavior: "smooth" });
       }
-    }, 200),
-    []
+  
+      containerRef.current.scrollTo({
+        left: nextScrollLeft,
+        behavior: "smooth",
+      });
+    }, 300),
+    [dispatch]
   );
+  
 
   useEffect(() => {
     window.addEventListener("wheel", handleScroll);
