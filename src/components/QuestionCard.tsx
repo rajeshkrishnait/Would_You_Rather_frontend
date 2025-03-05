@@ -61,14 +61,13 @@ const QuestionCard: React.FC = () => {
   const voteMutation = useMutation({
     mutationFn: async (vote: "vote_one" | "vote_two") => {
       const question = history[currentIndex];
-  
       if (!question) return;
 
       if (question.voteCompleted) {
         dispatch(updateFlip({ questionId: question.questionId }));
       } else {
         const updatedData = await submitVote(question.questionId, vote);
-        
+
         dispatch(
           updateVotes({
             questionId: question.questionId,
@@ -86,11 +85,8 @@ const QuestionCard: React.FC = () => {
             const nextCard = cards[currentIndex + 1] as HTMLElement | undefined;
 
             if (nextCard) {
-              requestAnimationFrame(() => {
-                nextCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
-
-                setTimeout(() => dispatch(goNext()), 1500);
-              });
+              smoothScrollTo(nextCard.offsetLeft);
+              setTimeout(() => dispatch(goNext()), 1500);
             }
           }
         }, 1000);
@@ -105,61 +101,72 @@ const QuestionCard: React.FC = () => {
     }
   }, [currentIndex, refetch]);
 
+  // ✅ Custom smooth scrolling function for Safari compatibility
+  const smoothScrollTo = (targetLeft: number) => {
+    if (!containerRef.current) return;
+
+    const startX = containerRef.current.scrollLeft;
+    const distance = targetLeft - startX;
+    const duration = 500;
+    let startTime: number | null = null;
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      containerRef.current!.scrollLeft = startX + distance * progress;
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    requestAnimationFrame(step);
+  };
+
   const handleWheel = useCallback(
     debounce((event: WheelEvent) => {
       if (!containerRef.current) return;
-  
-      event.preventDefault(); // Stop default browser scrolling
-  
-      const scrollAmount = containerRef.current.offsetWidth; // Full card width
-  
-      if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
-        // If vertical scroll detected (mouse wheel)
-        if (event.deltaY > 0) {
-          containerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-          setTimeout(()=>{
-            dispatch(goNext());
-        }, 1000)
-        } else {
-          containerRef.current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
-          setTimeout(()=>{
-            dispatch(goBack());
-          }, 1000)
-        }
-      } else {
-        // If horizontal swipe detected (trackpad)
-        if (event.deltaX > 0) {
-          containerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-          setTimeout(()=>{
-          dispatch(goNext());
-        }, 1500)
-        } else {
-          containerRef.current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
-          setTimeout(()=>{
 
-          dispatch(goBack());
-        }, 1500)
+      event.preventDefault(); // Stop default browser scrolling
+
+      const scrollAmount = containerRef.current.offsetWidth; // Full card width
+
+      if (Math.abs(event.deltaY) > Math.abs(event.deltaX) ) {
+        // Mouse Wheel Scroll
+        if (event.deltaY > 0) {
+          smoothScrollTo(containerRef.current.scrollLeft + scrollAmount);
+          setTimeout(() => dispatch(goNext()), 1000);
+        } else {
+          smoothScrollTo(containerRef.current.scrollLeft - scrollAmount);
+          setTimeout(() => dispatch(goBack()), 1000);
+        }
+      } else  {
+        // Trackpad Swipe
+        if (event.deltaX > 0) {
+          smoothScrollTo(containerRef.current.scrollLeft + scrollAmount);
+          setTimeout(() => dispatch(goNext()), 1500);
+        } else {
+          smoothScrollTo(containerRef.current.scrollLeft - scrollAmount);
+          setTimeout(() => dispatch(goBack()), 1500);
         }
       }
     }, 200),
     [dispatch]
   );
-  
-  
-  
-  
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-  
+
     container.addEventListener("wheel", handleWheel, { passive: false });
-  
+
     return () => {
       container.removeEventListener("wheel", handleWheel);
     };
   }, [handleWheel]);
+
   return (
-    <div id={'questions-js'}className="Questions" ref={containerRef}>
+    <div id="questions-js" className="Questions" ref={containerRef}>
       {history?.map((item, index) => (
         <div className="Questions__card-wrap" key={index}>
           <QuestionCardItem
@@ -168,13 +175,13 @@ const QuestionCard: React.FC = () => {
               item.totalVotes > 0 ? ((item.voteOne / item.totalVotes) * 100).toFixed(1) : "0.0"
             }
             flipState={!item.flipped}
-            onVote={debounce(() => voteMutation.mutate("vote_one"), 200)}
+            onVote={debounce(() => voteMutation.mutate("vote_one"), 300)}
             index={1}
           />
           <div className="Questions__circle">
             {voteMutation.status === "pending" ? (
               <>
-                <div className="loader"></div> 
+                <div className="loader"></div>
                 <span>Would you Rather?</span>
               </>
             ) : (
@@ -187,7 +194,7 @@ const QuestionCard: React.FC = () => {
               item.totalVotes > 0 ? ((item.voteTwo / item.totalVotes) * 100).toFixed(1) : "0.0"
             }
             flipState={!item.flipped}
-            onVote={debounce(() => voteMutation.mutate("vote_two"), 200)}
+            onVote={debounce(() => voteMutation.mutate("vote_two"), 300)}
             index={2}
           />
         </div>

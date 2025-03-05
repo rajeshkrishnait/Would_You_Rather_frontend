@@ -42,6 +42,7 @@
   width: inherit;
   text-wrap: auto;
   font-weight: 600;
+  white-space: break-spaces;
 }
 .question__card {
   flex: 1;
