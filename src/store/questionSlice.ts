@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface Question {
+export interface Question {
   questionId: string;
   questionOne: string;
   questionTwo: string;
@@ -60,9 +60,15 @@ const questionSlice = createSlice({
       if(question){
         question.flipped = !question.flipped
       }
+    },
+    insertNewQuestion: (state, action: PayloadAction<Question>) => {
+      // Insert after the currentIndex
+      state.history.splice(state.currentIndex + 1, 0, action.payload);
+      // Move to the newly inserted question
+      state.currentIndex++;
     }
   },
 });
 
-export const { addQuestions, goBack, goNext, updateVotes, updateFlip } = questionSlice.actions;
+export const { addQuestions, goBack, goNext, updateVotes, updateFlip, insertNewQuestion } = questionSlice.actions;
 export default questionSlice.reducer;

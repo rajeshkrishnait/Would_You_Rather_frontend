@@ -1,0 +1,46 @@
+/* Eye Container */
+.eyeContainer {
+	display: flex;
+	width: 100%;
+	justify-content: center;
+	align-items: center;
+	height: 100vh; /* Make it full screen */
+}
+
+/* Eye Lid */
+.eyeLid {
+	display: flex;
+	background-color: white;
+	border-radius: 50%;
+	box-shadow: inset -5px -3px 4px rgba(0, 0, 0, 0.144);
+	width: 80px;
+	height: 80px;
+	align-items: center;
+	justify-content: center;
+	transition: transform 0.1s linear; /* Smooth movement */
+}
+
+/* Eye (Pupil) */
+.eye {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 50%;
+	width: 50px;
+	height: 50px;
+	background-color: #08090a;
+	transition: transform 0.1s linear; /* Smooth movement */
+}
+
+/* White Reflection */
+.eye::after {
+	position: absolute;
+	width: 12px;
+	height: 12px;
+	background: white;
+	border-radius: 50%;
+	content: "";
+	top: 5px;
+	left: 8px;
+}

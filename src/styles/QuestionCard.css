@@ -4,7 +4,7 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
   white-space: nowrap;
-  overflow-x: auto; /* Change from 'scroll' to 'auto' */
+  overflow-x: hidden; /* Change from 'scroll' to 'auto' */
   gap: 20px;
   background-color: black;
   

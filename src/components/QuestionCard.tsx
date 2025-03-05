@@ -5,7 +5,7 @@ import { addQuestions, goBack, goNext, updateVotes, updateFlip } from "../store/
 import { fetchRandomQuestion, submitVote } from "../api/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import QuestionCardItem from "./QuestionCardItem";
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 import "../styles/QuestionCard.css";
 
 interface RawQuestionData {
@@ -62,8 +62,8 @@ const QuestionCard: React.FC = () => {
     mutationFn: async (vote: "vote_one" | "vote_two") => {
       const question = history[currentIndex];
   
-      if (!question) return; // Ensure question exists
-  
+      if (!question) return;
+
       if (question.voteCompleted) {
         dispatch(updateFlip({ questionId: question.questionId }));
       } else {
@@ -79,26 +79,24 @@ const QuestionCard: React.FC = () => {
             voteCompleted: true,
           })
         );
-  
+
         setTimeout(() => {
           if (containerRef.current) {
             const cards = containerRef.current.children;
             const nextCard = cards[currentIndex + 1] as HTMLElement | undefined;
-        
+
             if (nextCard) {
               requestAnimationFrame(() => {
                 nextCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
-        
-                // Dispatch state update after animation starts
-                setTimeout(() => dispatch(goNext()), 500); // Delay should match animation duration
+
+                setTimeout(() => dispatch(goNext()), 1500);
               });
             }
           }
-        }, 300); // E
+        }, 1000);
       }
     },
   });
-  
 
   useEffect(() => {
     if ((currentIndex === 0 || (currentIndex + 1) % 3 === 0) && !fetchedIndices.current.has(currentIndex)) {
@@ -107,66 +105,61 @@ const QuestionCard: React.FC = () => {
     }
   }, [currentIndex, refetch]);
 
-  const handleScroll = useCallback(
+  const handleWheel = useCallback(
     debounce((event: WheelEvent) => {
       if (!containerRef.current) return;
   
-      const scrollAmount = window.innerWidth + 20; // Exact card width + gap
-      const currentScrollLeft = containerRef.current.scrollLeft;
-      const nextScrollLeft = event.deltaY > 0 ? currentScrollLeft + scrollAmount : currentScrollLeft - scrollAmount;
+      event.preventDefault(); // Stop default browser scrolling
   
-      containerRef.current.scrollTo({
-        left: nextScrollLeft,
-        behavior: "smooth",
-      });
+      const scrollAmount = containerRef.current.offsetWidth; // Full card width
   
-      if (event.deltaY > 0) {
-        dispatch(goNext());
+      if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+        // If vertical scroll detected (mouse wheel)
+        if (event.deltaY > 0) {
+          containerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+          setTimeout(()=>{
+            dispatch(goNext());
+        }, 1000)
+        } else {
+          containerRef.current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+          setTimeout(()=>{
+            dispatch(goBack());
+          }, 1000)
+        }
       } else {
-        dispatch(goBack());
-      }
-    }, 300), // Debounce time adjusted
-    [dispatch]
-  );
-  
-  const handleKeyDown = useCallback(
-    debounce((event: KeyboardEvent) => {
-      event.preventDefault(); // Prevent default browser behavior
-      if (!containerRef.current) return;
-  
-      const scrollAmount = window.innerWidth + 20;
-      const currentScrollLeft = containerRef.current.scrollLeft;
-      let nextScrollLeft = currentScrollLeft;
-  
-      if (event.key === "ArrowRight") {
-        nextScrollLeft += scrollAmount;
-        dispatch(goNext());
-      } else if (event.key === "ArrowLeft") {
-        nextScrollLeft -= scrollAmount;
-        dispatch(goBack());
-      }
-  
-      containerRef.current.scrollTo({
-        left: nextScrollLeft,
-        behavior: "smooth",
-      });
-    }, 300),
-    [dispatch]
-  );
-  
+        // If horizontal swipe detected (trackpad)
+        if (event.deltaX > 0) {
+          containerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+          setTimeout(()=>{
+          dispatch(goNext());
+        }, 1500)
+        } else {
+          containerRef.current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+          setTimeout(()=>{
 
+          dispatch(goBack());
+        }, 1500)
+        }
+      }
+    }, 200),
+    [dispatch]
+  );
+  
+  
+  
+  
   useEffect(() => {
-    window.addEventListener("wheel", handleScroll);
-    window.addEventListener("keydown", handleKeyDown);
-
+    const container = containerRef.current;
+    if (!container) return;
+  
+    container.addEventListener("wheel", handleWheel, { passive: false });
+  
     return () => {
-      window.removeEventListener("wheel", handleScroll);
-      window.removeEventListener("keydown", handleKeyDown);
+      container.removeEventListener("wheel", handleWheel);
     };
-  }, [handleScroll, handleKeyDown]);
-
+  }, [handleWheel]);
   return (
-    <div className="Questions" ref={containerRef}>
+    <div id={'questions-js'}className="Questions" ref={containerRef}>
       {history?.map((item, index) => (
         <div className="Questions__card-wrap" key={index}>
           <QuestionCardItem
@@ -179,16 +172,15 @@ const QuestionCard: React.FC = () => {
             index={1}
           />
           <div className="Questions__circle">
-            {voteMutation.status === "pending"  ? (
+            {voteMutation.status === "pending" ? (
               <>
-              <div className="loader"></div> 
-              <span>Would you Rather?</span>
+                <div className="loader"></div> 
+                <span>Would you Rather?</span>
               </>
             ) : (
               <span>Would you Rather?</span>
             )}
           </div>
-          {item.voteCompleted && <div className="total_votes">{item.totalVotes}</div>}
           <QuestionCardItem
             questionText={item.questionTwo}
             votePercentage={

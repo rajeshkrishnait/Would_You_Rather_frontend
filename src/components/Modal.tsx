@@ -48,7 +48,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, setIsOpen }) => {
               <div className="modal-header">
                 <h5 className="modal-title">Submit Your Own Questions!!</h5>
               </div>
-              <NewQuestionForm />
+              <NewQuestionForm setIsOpen={setIsOpen}/>
               <div className="modal-footer">
                 <button
                   className="modal-button"
