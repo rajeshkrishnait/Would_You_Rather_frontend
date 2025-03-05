@@ -63,6 +63,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  gap: 20px;
 }
 .question_card-center span{
   text-wrap: auto;
@@ -106,6 +108,83 @@ button {
 100% {
   background-position: 0% 50%;
 }
+}
+
+/* Eye Container */
+.eyeContainer {
+	display: flex;
+	width: 100%;
+	justify-content: center;
+}
+
+/* Eye Lid */
+.eyeLid {
+	display: flex;
+	background-color: white;
+	border-radius: 50%;
+	box-shadow: inset -5px -3px 4px rgba(0, 0, 0, 0.144);
+	animation: blink 15s infinite;
+	width: 80px;
+	height: 80px;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Eye (Pupil) */
+.eye {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 50%;
+	width: 50px;
+	height: 50px;
+	background-color: #08090a;
+	animation: eyeball 15s infinite;
+}
+
+/* White Reflection */
+.eye::after {
+	position: absolute;
+	width: 12px;
+	height: 12px;
+	background: white;
+	border-radius: 50%;
+	content: "";
+	top: 5px;  /* Moves it to top */
+	left: 8px; /* Moves it to left */
+}
+
+/* Blinking Animation */
+@keyframes blink {
+	0%, 10%, 40%, 70%, 100% {
+		transform: scaleY(1);
+	}
+	10.5%, 40.5%, 70.5% {
+		transform: scaleY(0.1);
+	}
+	11%, 41%, 71% {
+		transform: scaleY(1);
+	}
+}
+
+/* Eye Movement Animation */
+@keyframes eyeball {
+	0%, 10%, 40%, 70%, 100% {
+		transform: translate(0px, 0px);
+	}
+	20% {
+		transform: translate(10px, -5px);
+	}
+	30% {
+		transform: translate(-8px, 5px);
+	}
+	50% {
+		transform: translate(5px, 5px);
+	}
+	60% {
+		transform: translate(-5px, -5px);
+	}
 }
 
 @media screen and ( max-width: 768px) {

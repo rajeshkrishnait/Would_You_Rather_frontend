@@ -1,11 +1,13 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { addQuestions, goBack, goNext, updateVotes, updateFlip } from "../store/questionSlice";
 import { fetchRandomQuestion, submitVote } from "../api/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import QuestionCardItem from "./QuestionCardItem";
+import { debounce } from 'lodash';
 import "../styles/QuestionCard.css";
+
 interface RawQuestionData {
   question_id: string;
   question_one: string;
@@ -25,12 +27,12 @@ interface FormattedQuestion {
   flipped: boolean;
   voteCompleted: boolean;
 }
+
 const QuestionCard: React.FC = () => {
   const dispatch = useDispatch();
   const { history, currentIndex } = useSelector((state: RootState) => state.question);
-  const question = history[currentIndex] || null;
   const containerRef = useRef<HTMLDivElement>(null);
-
+  const fetchedIndices = useRef(new Set<number>());
   console.log(history, currentIndex);
 
   const { refetch } = useQuery({
@@ -86,35 +88,45 @@ const QuestionCard: React.FC = () => {
   });
 
   useEffect(() => {
-    if (currentIndex === 0 || (currentIndex + 1) % 3 === 0) refetch();
+    if ((currentIndex === 0 || (currentIndex + 1) % 3 === 0) && !fetchedIndices.current.has(currentIndex)) {
+      refetch();
+      fetchedIndices.current.add(currentIndex);
+    }
   }, [currentIndex, refetch]);
 
-  const handleScroll = (event: WheelEvent) => {
-    if (!containerRef.current) return;
+  const handleScroll = useCallback(
+    debounce((event: WheelEvent) => {
+      if (!containerRef.current) return;
 
-    if (event.deltaY > 0) {
-      dispatch(goNext());
-    } else if (event.deltaY < 0) {
-      dispatch(goBack());
-    }
+      if (event.deltaY > 0) {
+        dispatch(goNext());
+      } else if (event.deltaY < 0) {
+        dispatch(goBack());
+      }
 
-    containerRef.current.scrollBy({
-      left: event.deltaY > 0 ? window.innerWidth + 20 : -window.innerWidth - 20,
-      behavior: "smooth",
-    });
-  };
+      containerRef.current.scrollBy({
+        left: event.deltaY > 0 ? window.innerWidth + 20 : -window.innerWidth - 20,
+        behavior: "smooth",
+      });
+    }, 200),
+    []
+  );
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (!containerRef.current) return;
+  const handleKeyDown = useCallback(
+    debounce((event: KeyboardEvent) => {
+      event.preventDefault()
+      if (!containerRef.current) return;
 
-    if (event.key === "ArrowRight") {
-      dispatch(goNext());
-      containerRef.current.scrollBy({ left: window.innerWidth + 20, behavior: "smooth" });
-    } else if (event.key === "ArrowLeft") {
-      dispatch(goBack());
-      containerRef.current.scrollBy({ left: -window.innerWidth - 20, behavior: "smooth" });
-    }
-  };
+      if (event.key === "ArrowRight") {
+        dispatch(goNext());
+        containerRef.current.scrollBy({ left: window.innerWidth + 20, behavior: "smooth" });
+      } else if (event.key === "ArrowLeft") {
+        dispatch(goBack());
+        containerRef.current.scrollBy({ left: -window.innerWidth - 20, behavior: "smooth" });
+      }
+    }, 200),
+    []
+  );
 
   useEffect(() => {
     window.addEventListener("wheel", handleScroll);
@@ -124,10 +136,8 @@ const QuestionCard: React.FC = () => {
       window.removeEventListener("wheel", handleScroll);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [handleScroll, handleKeyDown]);
 
-  if (!question) return <div>There are no more questions to load! Refresh the site to play again or add more questions!</div>;
-  console.log(history)
   return (
     <div className="Questions" ref={containerRef}>
       {history?.map((item, index) => (
@@ -138,7 +148,7 @@ const QuestionCard: React.FC = () => {
               item.totalVotes > 0 ? ((item.voteOne / item.totalVotes) * 100).toFixed(1) : "0.0"
             }
             flipState={!item.flipped}
-            onVote={() => voteMutation.mutate("vote_one")}
+            onVote={debounce(() => voteMutation.mutate("vote_one"), 200)}
           />
           <div className="Questions__circle">
             <span> Would you Rather?</span>
@@ -149,7 +159,7 @@ const QuestionCard: React.FC = () => {
               item.totalVotes > 0 ? ((item.voteTwo / item.totalVotes) * 100).toFixed(1) : "0.0"
             }
             flipState={!item.flipped}
-            onVote={() => voteMutation.mutate("vote_two")}
+            onVote={debounce(() => voteMutation.mutate("vote_two"), 200)}
           />
         </div>
       ))}

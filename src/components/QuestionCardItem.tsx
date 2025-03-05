@@ -29,6 +29,12 @@ const QuestionCardItem: React.FC<QuestionCardItemProps> = ({
     >
       {flipState ? (
         <div className="question_card-center" >
+		<div className="eyeLid">
+			<div className="eyes">
+				<div className="eye"></div>
+			</div>
+		
+	</div>
             <motion.span
                   style={{
                     margin: 10,
@@ -39,19 +45,11 @@ const QuestionCardItem: React.FC<QuestionCardItemProps> = ({
                     fontSize: '43px',
                   }}
                  animate={["initial"]}
-                //  whileHover={["grow"]}
                  variants={{
-                //    grow: {
-                //      scale: .5
-                //    },
                    rotate: {
                      rotate: [null, -5, 5, 0],
                      transition: {
-                       // delay,
                        duration: 10
-                       // repeat: Infinity,
-                       // repeatDelay: 0.2,
-                       // repeatType: "reverse"
                      }
                    },
                    initial: {
