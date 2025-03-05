@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import "./EyeComponent.css"; // Make sure this file contains your styles
+import "../styles/eye.css"; // Make sure this file contains your styles
 
-const EyeComponent = () => {
+const Eye = () => {
   const eyeRef = useRef<HTMLDivElement>(null);
   const lidRef = useRef<HTMLDivElement>(null);
   const [eyePosition, setEyePosition] = useState({ x: 0, y: 0 });
@@ -53,4 +53,4 @@ const EyeComponent = () => {
   );
 };
 
-export default EyeComponent;
+export default Eye;

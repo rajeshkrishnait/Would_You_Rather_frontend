@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-
+import Eye from './Eye.tsx'
 interface QuestionCardItemProps {
   questionText: string;
   votePercentage: string;
@@ -30,12 +30,7 @@ const QuestionCardItem: React.FC<QuestionCardItemProps> = ({
     >
       {flipState ? (
         <div className="question_card-center" >
-		<div className="eyeLid">
-			<div className="eyes">
-				<div className="eye"></div>
-			</div>
-		
-	</div>
+          <Eye/>
             <motion.span
                   style={{
                     margin: 10,

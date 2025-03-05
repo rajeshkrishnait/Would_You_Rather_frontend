@@ -2,9 +2,8 @@
 .eyeContainer {
 	display: flex;
 	width: 100%;
-	justify-content: center;
 	align-items: center;
-	height: 100vh; /* Make it full screen */
+	/* height: 100vh; Make it full screen */
 }
 
 /* Eye Lid */
