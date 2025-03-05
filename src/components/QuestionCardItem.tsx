@@ -6,6 +6,7 @@ interface QuestionCardItemProps {
   votePercentage: string;
   flipState: boolean;
   onVote: () => void;
+  index: number;
 }
 
 const QuestionCardItem: React.FC<QuestionCardItemProps> = ({
@@ -13,11 +14,11 @@ const QuestionCardItem: React.FC<QuestionCardItemProps> = ({
   votePercentage,
   flipState,
   onVote,
+  index
 }) => {
-  console.log(flipState)
   return (
     <motion.div
-      className="question__card"
+      className={`question__card question__card-${index}`}
       onClick={onVote}
       animate={{ rotateY: flipState ? 0 : 180 }}
       transition={{ duration: 0.6 }}

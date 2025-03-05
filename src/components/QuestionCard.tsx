@@ -33,7 +33,6 @@ const QuestionCard: React.FC = () => {
   const { history, currentIndex } = useSelector((state: RootState) => state.question);
   const containerRef = useRef<HTMLDivElement>(null);
   const fetchedIndices = useRef(new Set<number>());
-  console.log(history, currentIndex);
 
   const { refetch } = useQuery({
     queryKey: ["randomQuestions"],
@@ -85,15 +84,17 @@ const QuestionCard: React.FC = () => {
           if (containerRef.current) {
             const cards = containerRef.current.children;
             const nextCard = cards[currentIndex + 1] as HTMLElement | undefined;
-  
+        
             if (nextCard) {
               requestAnimationFrame(() => {
                 nextCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+        
+                // Dispatch state update after animation starts
+                setTimeout(() => dispatch(goNext()), 500); // Delay should match animation duration
               });
-              dispatch(goNext()); // Ensure state updates after scroll animation starts
             }
           }
-        }, 1000);
+        }, 300); // E
       }
     },
   });
@@ -175,10 +176,12 @@ const QuestionCard: React.FC = () => {
             }
             flipState={!item.flipped}
             onVote={debounce(() => voteMutation.mutate("vote_one"), 200)}
+            index={1}
           />
           <div className="Questions__circle">
             <span> Would you Rather?</span>
           </div>
+          {item.voteCompleted && <div className="total_votes">{item.totalVotes}</div>}
           <QuestionCardItem
             questionText={item.questionTwo}
             votePercentage={
@@ -186,6 +189,7 @@ const QuestionCard: React.FC = () => {
             }
             flipState={!item.flipped}
             onVote={debounce(() => voteMutation.mutate("vote_two"), 200)}
+            index={2}
           />
         </div>
       ))}
