@@ -61,29 +61,37 @@ const QuestionCard: React.FC = () => {
   const voteMutation = useMutation({
     mutationFn: async (vote: "vote_one" | "vote_two") => {
       const question = history[currentIndex];
-      if (!question) return;
-
+      if (!question) return null;
+  
       if (question.voteCompleted) {
-        dispatch(updateFlip({ questionId: question.questionId }));
+        return { questionId: question.questionId, alreadyVoted: true };
       } else {
         const updatedData = await submitVote(question.questionId, vote);
-
+        return { ...updatedData, questionId: question.questionId, alreadyVoted: false };
+      }
+    },
+    onSuccess: (data) => {
+      if (!data) return;
+  
+      if (data.alreadyVoted) {
+        dispatch(updateFlip({ questionId: data.questionId }));
+      } else {
         dispatch(
           updateVotes({
-            questionId: question.questionId,
-            voteOne: updatedData.vote_one,
-            voteTwo: updatedData.vote_two,
-            totalVotes: updatedData.total_votes,
+            questionId: data.questionId,
+            voteOne: data.vote_one,
+            voteTwo: data.vote_two,
+            totalVotes: data.total_votes,
             flipped: true,
             voteCompleted: true,
           })
         );
-
+  
         setTimeout(() => {
           if (containerRef.current) {
             const cards = containerRef.current.children;
             const nextCard = cards[currentIndex + 1] as HTMLElement | undefined;
-
+  
             if (nextCard) {
               smoothScrollTo(nextCard.offsetLeft);
               setTimeout(() => dispatch(goNext()), 1500);
@@ -93,6 +101,7 @@ const QuestionCard: React.FC = () => {
       }
     },
   });
+  
 
   useEffect(() => {
     if ((currentIndex === 0 || (currentIndex + 1) % 3 === 0) && !fetchedIndices.current.has(currentIndex)) {
@@ -126,13 +135,24 @@ const QuestionCard: React.FC = () => {
   const handleWheel = useCallback(
     debounce((event: WheelEvent) => {
       if (!containerRef.current) return;
-
+      
       event.preventDefault(); // Stop default browser scrolling
-
+  
       const scrollAmount = containerRef.current.offsetWidth; // Full card width
-
-      if (Math.abs(event.deltaY) > Math.abs(event.deltaX) ) {
-        // Mouse Wheel Scroll
+      const isHorizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY);
+  
+      // Force consistent direction regardless of input device
+      if (isHorizontal) {
+        // Horizontal Swipe (Trackpad)
+        if (event.deltaX > 0) {
+          smoothScrollTo(containerRef.current.scrollLeft + scrollAmount);
+          setTimeout(() => dispatch(goNext()), 1000);
+        } else {
+          smoothScrollTo(containerRef.current.scrollLeft - scrollAmount);
+          setTimeout(() => dispatch(goBack()), 1000);
+        }
+      } else {
+        // Vertical Scroll (Mouse Wheel)
         if (event.deltaY > 0) {
           smoothScrollTo(containerRef.current.scrollLeft + scrollAmount);
           setTimeout(() => dispatch(goNext()), 1000);
@@ -140,20 +160,11 @@ const QuestionCard: React.FC = () => {
           smoothScrollTo(containerRef.current.scrollLeft - scrollAmount);
           setTimeout(() => dispatch(goBack()), 1000);
         }
-      } else  {
-        // Trackpad Swipe
-        if (event.deltaX > 0) {
-          smoothScrollTo(containerRef.current.scrollLeft + scrollAmount);
-          setTimeout(() => dispatch(goNext()), 1500);
-        } else {
-          smoothScrollTo(containerRef.current.scrollLeft - scrollAmount);
-          setTimeout(() => dispatch(goBack()), 1500);
-        }
       }
     }, 200),
     [dispatch]
   );
-
+  
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
