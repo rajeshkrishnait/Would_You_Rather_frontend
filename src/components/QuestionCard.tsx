@@ -179,7 +179,14 @@ const QuestionCard: React.FC = () => {
             index={1}
           />
           <div className="Questions__circle">
-            <span> Would you Rather?</span>
+            {voteMutation.status === "pending"  ? (
+              <>
+              <div className="loader"></div> 
+              <span>Would you Rather?</span>
+              </>
+            ) : (
+              <span>Would you Rather?</span>
+            )}
           </div>
           {item.voteCompleted && <div className="total_votes">{item.totalVotes}</div>}
           <QuestionCardItem
