@@ -33,7 +33,9 @@ const QuestionCard: React.FC = () => {
   const { history, currentIndex } = useSelector((state: RootState) => state.question);
   const containerRef = useRef<HTMLDivElement>(null);
   const fetchedIndices = useRef(new Set<number>());
-
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+  console.log(currentIndex)
   const { refetch } = useQuery({
     queryKey: ["randomQuestions"],
     queryFn: async () => {
@@ -182,6 +184,53 @@ const QuestionCard: React.FC = () => {
     };
   }, [handleWheel]);
 
+
+  //Mobile card events
+  const handleTouchStart = (event: TouchEvent) => {
+    touchStartX.current = event.touches[0].clientX;
+  };
+  
+  const handleTouchMove = (event: TouchEvent) => {
+    if (touchStartX.current !== null) {
+      event.preventDefault(); // 🚫 Stops default horizontal scroll/swipe behavior
+    }
+    touchEndX.current = event.touches[0].clientX;
+  };
+  
+  const handleTouchEnd = () => {
+    if (touchStartX.current === null || touchEndX.current === null) return;
+  
+    const swipeDistance = touchEndX.current - touchStartX.current;
+    const minSwipeThreshold = 50;
+  
+    if (Math.abs(swipeDistance) > minSwipeThreshold) {
+      if (swipeDistance > 0) {
+        smoothScrollTo(containerRef.current!.scrollLeft - containerRef.current!.offsetWidth);
+        setTimeout(() => dispatch(goBack()), 500);
+      } else {
+        smoothScrollTo(containerRef.current!.scrollLeft + containerRef.current!.offsetWidth);
+        setTimeout(() => dispatch(goNext()), 500);
+      }
+    }
+  
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+  
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+  
+    container.addEventListener("touchstart", handleTouchStart, { passive: false });
+    container.addEventListener("touchmove", handleTouchMove, { passive: false });
+    container.addEventListener("touchend", handleTouchEnd);
+  
+    return () => {
+      container.removeEventListener("touchstart", handleTouchStart);
+      container.removeEventListener("touchmove", handleTouchMove);
+      container.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []);
   return (
     <div id="questions-js" className="Questions" ref={containerRef}>
       {history?.map((item) => (
