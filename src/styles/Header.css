@@ -5,6 +5,16 @@ nav{
     margin-right: 2%;
     margin-top: 2%;
     cursor:pointer;
+    display: flex;
+    gap: 10px;
+    width:100vw
+}
+nav img{
+    height:50px;
+    width:50px;
+    margin-right: auto;
+    margin-top: -15px;
+    margin-left: 58px;
 }
 @media screen and (max-width: 768px) {
     nav > svg{
@@ -12,5 +22,11 @@ nav{
         height: 25px !important;
         margin-right: 20px;
         margin-top: 20px;
+    }
+    nav img{
+        width: 35px;
+        height: auto;
+        margin-left: 38px;
+        margin-top: 15px;
     }
 }
