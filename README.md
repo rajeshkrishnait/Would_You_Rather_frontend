@@ -1,54 +1,66 @@
-# React + TypeScript + Vite
+# Would You Rather - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Would You Rather is an interactive web application where users vote between two options in a poll. Built with React, Redux, and TanStack Query, the app provides a seamless user experience with smooth navigation and state management.
 
-Currently, two official plugins are available:
+## 🚀 Features
+- Vote on thought-provoking 'Would You Rather' questions
+- View poll results and community voting trends
+- Infinite scrolling for a continuous question stream
+- Optimized state management with Redux
+- API-driven architecture for fetching questions and submitting votes
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠️ Tech Stack
+- **Frontend:** React, TypeScript, Redux Toolkit, Reack-Hook-Form, Framer Motion
+- **State Management:** Redux Toolkit, TanStack Query
+- **Styling:** CSS
+- **Backend:** [Would_You_Rather_backend](https://github.com/rajeshkrishnait/Would_You_Rather_backend) (Node/express)
 
-## Expanding the ESLint configuration
+## 📦 Installation
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/rajeshkrishnait/Would_You_Rather_frontend.git
+   cd Would_You_Rather_frontend
+   ```
+2. **Install dependencies:**
+   ```sh
+   npm install
+   ```
+3. **Start the development server:**
+   ```sh
+   npm run dev
+   ```
+4. The app should now be running at `http://localhost:5173/`
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## ⚙️ Configuration
+- The frontend interacts with a FastAPI backend.
+- To configure API endpoints, update `src/config.js`:
+  ```js
+  export const API_BASE_URL = "http://localhost:8000/api";
+  ```
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 🏗️ Project Structure
+```
+📦 src
+ ┣ 📂components       # UI components
+ ┣ 📂pages            # Application pages
+ ┣ 📂redux            # Redux state management
+ ┣ 📂services         # API interaction logic
+ ┣ 📂utils            # Utility functions
+ ┣ 📜App.tsx          # Main app component
+ ┗ 📜main.tsx         # Entry point
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📝 Contributing
+Contributions are welcome! To contribute:
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature-branch`).
+3. Commit your changes (`git commit -m "Added new feature"`).
+4. Push to your branch (`git push origin feature-branch`).
+5. Open a Pull Request.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📄 License
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+---
+🚀 **Happy coding!** Feel free to open issues or suggestions for improvements.
+
