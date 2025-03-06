@@ -161,7 +161,7 @@ const QuestionCard: React.FC = () => {
   
       if (isHorizontal) {
         // Ensure swipe distance is significant
-        if (Math.abs(event.deltaX) < minSwipeThreshold) return;
+        // if (Math.abs(event.deltaX) < minSwipeThreshold) return;
   
         if (event.deltaX > 0) {
           smoothScrollTo(containerRef.current.scrollLeft + scrollAmount);
