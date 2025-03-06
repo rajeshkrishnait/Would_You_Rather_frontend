@@ -32,15 +32,20 @@ const QuestionCard: React.FC = () => {
   const dispatch = useDispatch();
   const { history, currentIndex } = useSelector((state: RootState) => state.question);
   const containerRef = useRef<HTMLDivElement>(null);
-  const fetchedIndices = useRef(new Set<number>());
+  const fetchedIndices = useRef(
+    new Set<number>(
+      history.map((_, index) => index)
+    )
+  );
   const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   console.log(currentIndex)
   const { refetch } = useQuery({
     queryKey: ["randomQuestions"],
     queryFn: async () => {
       const rawDataArray = await fetchRandomQuestion();
-      const formattedQuestions: FormattedQuestion[] = rawDataArray.map(
+      let formattedQuestions: FormattedQuestion[] = rawDataArray.map(
         (rawData: RawQuestionData) => ({
           questionId: rawData.question_id,
           questionOne: rawData.question_one,
@@ -53,8 +58,17 @@ const QuestionCard: React.FC = () => {
         })
       );
 
-      dispatch(addQuestions(formattedQuestions));
-      return formattedQuestions;
+      // Retrieve stored votes from localStorage
+    const storedVotes = JSON.parse(localStorage.getItem("votedQuestions") || "[]");
+
+    // Merge stored votes with new questions
+    formattedQuestions = formattedQuestions.map((question) => {
+      const storedQuestion = storedVotes.find((q: FormattedQuestion) => q.questionId === question.questionId);
+      return storedQuestion ? { ...question, ...storedQuestion } : question;
+    });
+
+    dispatch(addQuestions(formattedQuestions));
+    return formattedQuestions;
     },
     staleTime: 0,
     enabled: false,
@@ -106,7 +120,7 @@ const QuestionCard: React.FC = () => {
   
 
   useEffect(() => {
-    if ((currentIndex === 0 || (currentIndex + 1) % 3 === 0) && !fetchedIndices.current.has(currentIndex)) {
+    if ((currentIndex === 0 || (currentIndex + 1) % 3 === 0) && (fetchedIndices.current.size - 1 == currentIndex || !fetchedIndices.current.has(currentIndex))) {
       refetch();
       fetchedIndices.current.add(currentIndex);
     }
@@ -188,14 +202,23 @@ const QuestionCard: React.FC = () => {
   //Mobile card events
   const handleTouchStart = (event: TouchEvent) => {
     touchStartX.current = event.touches[0].clientX;
+    touchStartY.current = event.touches[0].clientY;
   };
   
   const handleTouchMove = (event: TouchEvent) => {
-    if (touchStartX.current !== null) {
-      event.preventDefault(); // 🚫 Stops default horizontal scroll/swipe behavior
+    if (touchStartX.current === null) return;
+  
+    const deltaX = event.touches[0].clientX - touchStartX.current;
+    const deltaY = event.touches[0].clientY - (touchStartY.current ?? event.touches[0].clientY);
+  
+    // Allow vertical scrolling by preventing default only for significant horizontal swipes
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      event.preventDefault(); // 🚫 Block default horizontal scroll
     }
+  
     touchEndX.current = event.touches[0].clientX;
   };
+  
   
   const handleTouchEnd = () => {
     if (touchStartX.current === null || touchEndX.current === null) return;

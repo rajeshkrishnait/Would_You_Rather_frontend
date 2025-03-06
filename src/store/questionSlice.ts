@@ -17,7 +17,7 @@ interface QuestionState {
 }
 
 const initialState: QuestionState = {
-  history: [],
+  history: JSON.parse(localStorage.getItem("votedQuestions") || "[]"),
   currentIndex: 0,
 };
 
@@ -44,16 +44,20 @@ const questionSlice = createSlice({
         state.currentIndex++;
       }
     },
-    updateVotes: (state, action: PayloadAction<{ questionId: string; voteOne: number; voteTwo: number; totalVotes: number; flipped:boolean; voteCompleted:boolean }>) => {
-      const { questionId, voteOne, voteTwo, totalVotes } = action.payload;
-      const question = state.history.find(q => q.questionId === questionId);
+    updateVotes: (state, action) => {
+      const { questionId, voteOne, voteTwo, totalVotes, flipped, voteCompleted } = action.payload;
+      const question = state.history.find((q) => q.questionId === questionId);
+      
       if (question) {
         question.voteOne = voteOne;
         question.voteTwo = voteTwo;
         question.totalVotes = totalVotes;
-        question.flipped = true;
-        question.voteCompleted = true;
+        question.flipped = flipped;
+        question.voteCompleted = voteCompleted;
       }
+    
+      // Save updated history to localStorage
+      localStorage.setItem("votedQuestions", JSON.stringify(state.history));
     },
     updateFlip:(state, action: PayloadAction<{questionId: string;}>)=>{
       const question = state.history.find(q => q.questionId === action.payload.questionId);
