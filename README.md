@@ -10,10 +10,10 @@ Would You Rather is an interactive web application where users vote between two 
 - API-driven architecture for fetching questions and submitting votes
 
 ## 🛠️ Tech Stack
-- **Frontend:** React, TypeScript, Redux Toolkit, Zustand
+- **Frontend:** React, TypeScript, Redux Toolkit, Reack-Hook-Form, Framer Motion
 - **State Management:** Redux Toolkit, TanStack Query
-- **Styling:** Tailwind CSS
-- **Backend:** [Would_You_Rather_backend](https://github.com/rajeshkrishnait/Would_You_Rather_backend) (FastAPI)
+- **Styling:** CSS
+- **Backend:** [Would_You_Rather_backend](https://github.com/rajeshkrishnait/Would_You_Rather_backend) (Node/express)
 
 ## 📦 Installation
 1. **Clone the repository:**
